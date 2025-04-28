@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4" style="color: #efb911;">Historial de Solicitudes</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>N° SIC</th>
+                <th>Username</th>
+                <th>¿Es para muestra?</th>
+                <th>Descripción</th>
+                <th>Fecha Requerida</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for solicitud in solicitudes %}
+            <tr>
+                <td>{{ solicitud.numero_sic }}</td>
+                <td>{{ solicitud.solicitante.username }}</td>
+                <td>{{ solicitud.es_muestra|yesno:"Sí,No" }}</td>
+                <td>{{ solicitud.descripcion }}</td>
+                <td>{{ solicitud.fecha_requerida }}</td>
+                <td>{{ solicitud.estado }}</td>
+                <td>
+                    <!-- Botón para editar -->
+                    {% if solicitud.estado == "Rechazado" and not solicitud.editada %}
+                    <a href="{% url 'editar_solicitud' solicitud.numero_sic %}" class="btn btn-warning btn-sm">Editar</a>
+                    {% endif %}
+                    
+                    <!-- Botón para duplicar -->
+                    <a href="{% url 'duplicar_solicitud' solicitud.numero_sic %}" class="btn btn-primary btn-sm">Duplicar</a>
+                    
+                    <!-- Botón para ver detalles -->
+                    <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#detalleModal{{ solicitud.numero_sic }}">
+                        Ver Detalles
+                    </button>
+                </td>
+            </tr>
+
+            <!-- Modal de detalles -->
+            <div class="modal fade" id="detalleModal{{ solicitud.numero_sic }}" tabindex="-1" aria-labelledby="detalleModalLabel{{ solicitud.numero_sic }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="detalleModalLabel{{ solicitud.numero_sic }}">Detalles de la Solicitud</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p><strong>N° SIC:</strong> {{ solicitud.numero_sic }}</p>
+                            <p><strong>Username:</strong> {{ solicitud.solicitante.username }}</p>
+                            <p><strong>¿Es para muestra?:</strong> {{ solicitud.es_muestra|yesno:"Sí,No" }}</p>
+                            <p><strong>Pertenece a:</strong> {{ solicitud.pertenece }}</p>
+                            <p><strong>Fecha Requerida:</strong> {{ solicitud.fecha_requerida }}</p>
+                            <p><strong>Solicitante:</strong> {{ solicitud.solicitante.get_full_name }}</p>
+                            <p><strong>Descripción:</strong> {{ solicitud.descripcion }}</p>
+                            <p><strong>Especificación Técnica:</strong> {{ solicitud.especificacion_tecnica }}</p>
+                            <p><strong>Cantidad:</strong> {{ solicitud.cantidad }}</p>
+                            <p><strong>Unidad:</strong> {{ solicitud.unidad }}</p>
+                            <p><strong>Comentario:</strong> {{ solicitud.comentario }}</p>
+                            <p><strong>Archivo:</strong> 
+                                {% if solicitud.archivo %}
+                                <a href="{{ solicitud.archivo.url }}" download>Descargar Archivo</a>
+                                {% else %}
+                                No hay archivo adjunto.
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

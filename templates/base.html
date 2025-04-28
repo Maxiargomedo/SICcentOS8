@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Sistema de Autorización{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    
+    <!-- FontAwesome CSS -->
+    <link href="{% static 'fontawesome/css/all.min.css' %}" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        {% if user.is_authenticated %}
+        <div class="sidebar bg-dark text-white vh-100" style="width: 250px; position: fixed;">
+            <div class="sidebar-header text-center py-4">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="{% url 'home' %}">
+                        <img src="{% static 'img/logo_mamut.jpg' %}" alt="Logo" height="60">
+                    </a>
+                    <h5 class="text-white mb-1">{{ request.user.username }}</h5>
+                    <small class="text-white mb-1">{{ request.user.email }}</small>
+                </div>
+            </div>
+
+            <ul class="nav flex-column px-3">
+                <li class="nav-item mb-2">
+                    <a href="{% url 'home' %}" class="nav-link text-white">
+                        <i class="fas fa-file-alt me-2"></i> Solicitudes SIC
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'historial' %}" class="nav-link text-white">
+                        <i class="fas fa-history me-2"></i> Historial
+                    </a>
+                </li>
+                {% if is_revisor or is_aprobador or is_admin %}
+                <li class="nav-item mb-2">
+                    <a href="{% url 'revisor' %}" class="nav-link text-white">
+                        <i class="fas fa-check me-2"></i> Revisor
+                    </a>
+                </li>
+                {% endif %}
+                {% if is_aprobador or is_admin %}
+                <li class="nav-item mb-2">
+                    <a href="{% url 'aprobaciones' %}" class="nav-link text-white">
+                        <i class="fas fa-thumbs-up me-2"></i> Aprobaciones
+                    </a>
+                </li>
+                {% endif %}
+                {% if is_admin %}
+                <li class="nav-item mb-2">
+                    <a href="{% url 'admin:index' %}" class="nav-link text-white">
+                        <i class="fas fa-cog me-2"></i> Administración
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+            <div class="sidebar-footer mt-auto p-3">
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger w-100">
+                        <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Main Content -->
+        <div class="content flex-grow-1" style="{% if user.is_authenticated %}margin-left: 250px;{% else %}margin-left: 0; width: 100%;{% endif %}">
+            <!-- Navbar superior -->
+            <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #efb911;">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="{% url 'home' %}">
+                        Sistema de solicitudes
+                    </a>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="container-fluid py-4">
+                {% block content %}{% endblock %}
+            </main>
+
+            <!-- Footer -->
+            <footer class="bg-dark text-white py-3">
+                <div class="container text-center">
+                    <small>© {% now 'Y' %} Sistema de Autorización de Compras</small>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

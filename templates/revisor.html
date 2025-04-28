@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Revisión de Solicitudes SIC</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>N° SIC</th>
+                <th>Detalle</th>
+                <th>Cantidad</th>
+                <th>Unidad</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for solicitud in solicitudes %}
+            <tr>
+                <td>{{ solicitud.numero_sic }}</td>
+                <td>{{ solicitud.detalle }}</td>
+                <td>{{ solicitud.cantidad }}</td>
+                <td>{{ solicitud.unidad }}</td>
+                <td>
+                    <a href="{% url 'detalle_solicitud' solicitud.id %}" class="btn btn-info btn-sm">Ver Detalle</a>
+                    <a href="{% url 'aprobar_solicitud' solicitud.id %}" class="btn btn-success btn-sm">Aprobar</a>
+                    <a href="{% url 'rechazar_solicitud' solicitud.id %}" class="btn btn-danger btn-sm">Rechazar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

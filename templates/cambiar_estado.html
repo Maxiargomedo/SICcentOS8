@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4" style="color: #efb911;">Cambiar Estado de la Solicitud</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="estado" class="form-label">Estado</label>
+            <select name="estado" id="estado" class="form-select">
+                <option value="Pendiente" {% if solicitud.estado == "Pendiente" %}selected{% endif %}>Pendiente</option>
+                <option value="Autorizado" {% if solicitud.estado == "Autorizado" %}selected{% endif %}>Autorizado</option>
+                <option value="Rechazado" {% if solicitud.estado == "Rechazado" %}selected{% endif %}>Rechazado</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-success">Guardar Cambios</button>
+        <a href="{% url 'historial' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

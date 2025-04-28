@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4" style="color: #efb911;">Aprobaciones</h2>
+
+    <!-- Tabla de Solicitudes Pendientes -->
+    <h3>Solicitudes Pendientes</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>N° SIC</th>
+                <th>Nombre Completo</th>
+                <th>¿Es para muestra?</th>
+                <th>Descripción</th>
+                <th>Fecha Requerida</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for solicitud in solicitudes_pendientes %}
+            <tr>
+                <td>{{ solicitud.numero_sic }}</td>
+                <td>{{ solicitud.solicitante.get_full_name }}</td>
+                <td>{{ solicitud.es_muestra|yesno:"Sí,No" }}</td>
+                <td>{{ solicitud.descripcion }}</td>
+                <td>{{ solicitud.fecha_requerida }}</td>
+                <td>{{ solicitud.estado }}</td>
+                <td>
+                    <!-- Botón para aprobar -->
+                    <form method="POST" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="solicitud_numero_sic" value="{{ solicitud.numero_sic }}">
+                        <input type="hidden" name="accion" value="aprobar">
+                        <button type="submit" class="btn btn-success btn-sm">Aprobar</button>
+                    </form>
+
+                    <!-- Botón para rechazar -->
+                    <form method="POST" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="solicitud_numero_sic" value="{{ solicitud.numero_sic }}">
+                        <input type="hidden" name="accion" value="rechazar">
+                        <button type="submit" class="btn btn-danger btn-sm">Rechazar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Tabla de Solicitudes Aprobadas -->
+    <h3>Solicitudes Aprobadas</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>N° SIC</th>
+                <th>Nombre Completo</th>
+                <th>¿Es para muestra?</th>
+                <th>Descripción</th>
+                <th>Fecha Requerida</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for solicitud in solicitudes_aprobadas %}
+            <tr>
+                <td>{{ solicitud.numero_sic }}</td>
+                <td>{{ solicitud.solicitante.get_full_name }}</td>
+                <td>{{ solicitud.es_muestra|yesno:"Sí,No" }}</td>
+                <td>{{ solicitud.descripcion }}</td>
+                <td>{{ solicitud.fecha_requerida }}</td>
+                <td>{{ solicitud.estado }}</td>
+                <td>
+                    <!-- Botón para ver detalles -->
+                    <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#detalleModal{{ solicitud.numero_sic }}">
+                        Ver Detalles
+                    </button>
+
+                    <!-- Botón de maqueta -->
+                    <button type="button" class="btn btn-secondary btn-sm">Enviar JSON</button>
+                </td>
+            </tr>
+
+            <!-- Modal de detalles -->
+            <div class="modal fade" id="detalleModal{{ solicitud.numero_sic }}" tabindex="-1" aria-labelledby="detalleModalLabel{{ solicitud.numero_sic }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="detalleModalLabel{{ solicitud.numero_sic }}">Detalles de la Solicitud</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p><strong>N° SIC:</strong> {{ solicitud.numero_sic }}</p>
+                            <p><strong>Nombre Completo:</strong> {{ solicitud.solicitante.get_full_name }}</p>
+                            <p><strong>¿Es para muestra?:</strong> {{ solicitud.es_muestra|yesno:"Sí,No" }}</p>
+                            <p><strong>Pertenece a:</strong> {{ solicitud.pertenece }}</p>
+                            <p><strong>Fecha Requerida:</strong> {{ solicitud.fecha_requerida }}</p>
+                            <p><strong>Descripción:</strong> {{ solicitud.descripcion }}</p>
+                            <p><strong>Especificación Técnica:</strong> {{ solicitud.especificacion_tecnica }}</p>
+                            <p><strong>Cantidad:</strong> {{ solicitud.cantidad }}</p>
+                            <p><strong>Unidad:</strong> {{ solicitud.unidad }}</p>
+                            <p><strong>Comentario:</strong> {{ solicitud.comentario }}</p>
+                            <p><strong>Archivo:</strong> 
+                                {% if solicitud.archivo %}
+                                <a href="{{ solicitud.archivo.url }}" download>Descargar Archivo</a>
+                                {% else %}
+                                No hay archivo adjunto.
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

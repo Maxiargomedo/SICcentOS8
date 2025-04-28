@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center mb-4" style="color: #efb911;">Solicitud de Compra - SIC</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="numero_sic" class="form-label">N° SIC</label>
+                <input type="text" class="form-control" id="numero_sic" value="{{ numero_sic }}" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="id_es_muestra" class="form-label">¿Es para muestra?</label>
+                {{ form.es_muestra|add_class:"form-select" }}
+            </div>
+            <div class="mb-3">
+                <label for="id_pertenece" class="form-label">Pertenece a</label>
+                {{ form.pertenece|add_class:"form-control" }}
+            </div>
+            <div class="mb-3">
+                <label for="id_fecha_requerida" class="form-label">Fecha Requerida</label>
+                {{ form.fecha_requerida|add_class:"form-control" }}
+            </div>
+            <div class="mb-3">
+                <label for="id_otro_solicitante" class="form-label">Solicitante</label>
+                <input type="text" class="form-control" value="{{ solicitante }}" readonly>
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="otro_solicitante_checkbox">
+                    <label class="form-check-label" for="otro_solicitante_checkbox">Otro solicitante</label>
+                </div>
+                <input type="text" class="form-control mt-2 d-none" id="otro_solicitante" name="otro_solicitante" placeholder="Escriba el nombre del solicitante">
+            </div>
+            <div class="mb-3">
+                <label for="id_descripcion" class="form-label">Descripción de la Compra</label>
+                {{ form.descripcion|add_class:"form-control" }}
+            </div>
+            <div class="mb-3">
+                <label for="id_especificacion_tecnica" class="form-label">Especificación Técnica</label>
+                {{ form.especificacion_tecnica|add_class:"form-control" }}
+            </div>
+            <div class="mb-3">
+                <label for="id_cantidad" class="form-label">Cantidad</label>
+                {{ form.cantidad|add_class:"form-control" }}
+            </div>
+            <div class="mb-3">
+                <label for="id_unidad" class="form-label">Unidad</label>
+                {{ form.unidad|add_class:"form-control" }}
+            </div>
+            <div class="mb-3">
+                <label for="id_comentario" class="form-label">Comentario</label>
+                {{ form.comentario|add_class:"form-control" }}
+            </div>
+            <div class="mb-3">
+                <label for="id_archivo" class="form-label">Adjuntar Archivo</label>
+                {{ form.archivo|add_class:"form-control" }}
+            </div>
+            <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-success">Enviar Solicitud</button>
+                <a href="{% url 'historial' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById('otro_solicitante_checkbox').addEventListener('change', function() {
+        const input = document.getElementById('otro_solicitante');
+        input.classList.toggle('d-none', !this.checked);
+    });
+</script>
+{% endblock %}
