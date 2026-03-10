@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Iniciar Sesión - Sistema de Autorización</title>
+    <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="static/fontawesome/css/all.min.css" rel="stylesheet">
+    <link href="static/css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Main Content (no sidebar on login) -->
+        <div class="content flex-grow-1" style="margin-left: 0; width: 100%;">
+            <!-- Navbar -->
+            <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #efb911;">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="index.html">Sistema de solicitudes</a>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="container-fluid py-4">
+                <div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+                    <div class="card shadow-lg p-4" style="width: 100%; max-width: 400px; border-radius: 10px;">
+                        <h2 class="text-center mb-4" style="color: #efb911;">Iniciar Sesión</h2>
+                        <div id="error-msg" class="alert alert-danger d-none"></div>
+                        <form id="login-form">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Correo Electrónico</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
+                        </form>
+                        <hr>
+                        <div class="text-muted small">
+                            <p class="mb-1"><strong>Usuarios de prueba:</strong></p>
+                            <ul class="list-unstyled mb-0">
+                                <li><code>admin@empresa.cl</code> / <code>admin123</code> (Administrador)</li>
+                                <li><code>usuario@empresa.cl</code> / <code>user123</code> (Usuario)</li>
+                                <li><code>revisor@empresa.cl</code> / <code>revisor123</code> (Revisor)</li>
+                                <li><code>aprobador@empresa.cl</code> / <code>aprobador123</code> (Aprobador)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="bg-dark text-white py-3">
+                <div class="container text-center">
+                    <small>&copy; 2026 Sistema de Autorización de Compras</small>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="static/js/app.js"></script>
+    <script>
+        // Redirect if already logged in
+        if (getCurrentUser()) {
+            window.location.href = "home.html";
+        }
+
+        document.getElementById("login-form").addEventListener("submit", function(e) {
+            e.preventDefault();
+            var email = document.getElementById("email").value;
+            var password = document.getElementById("password").value;
+            if (login(email, password)) {
+                window.location.href = "home.html";
+            } else {
+                var errEl = document.getElementById("error-msg");
+                errEl.textContent = "Correo o contraseña incorrectos.";
+                errEl.classList.remove("d-none");
+            }
+        });
+    </script>
+</body>
+</html>

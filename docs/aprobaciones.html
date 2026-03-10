@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Aprobaciones - Sistema de Autorización</title>
+    <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="static/fontawesome/css/all.min.css" rel="stylesheet">
+    <link href="static/css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar bg-dark text-white vh-100" style="width: 250px; position: fixed;"></div>
+
+        <!-- Main Content -->
+        <div class="content flex-grow-1" style="margin-left: 250px;">
+            <!-- Navbar -->
+            <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #efb911;">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="home.html">Sistema de solicitudes</a>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="container-fluid py-4">
+                <div class="container mt-5">
+                    <h2 class="text-center mb-4" style="color: #efb911;">Aprobaciones</h2>
+                    <div id="alert-msg" class="alert d-none"></div>
+
+                    <!-- Solicitudes Pendientes -->
+                    <h3>Solicitudes Pendientes</h3>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>N° SIC</th>
+                                <th>Nombre Completo</th>
+                                <th>¿Es para muestra?</th>
+                                <th>Descripción</th>
+                                <th>Fecha Requerida</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendientes-body">
+                        </tbody>
+                    </table>
+
+                    <!-- Solicitudes Aprobadas -->
+                    <h3>Solicitudes Aprobadas</h3>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>N° SIC</th>
+                                <th>Nombre Completo</th>
+                                <th>¿Es para muestra?</th>
+                                <th>Descripción</th>
+                                <th>Fecha Requerida</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="aprobadas-body">
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="bg-dark text-white py-3">
+                <div class="container text-center">
+                    <small>&copy; 2026 Sistema de Autorización de Compras</small>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal fade" id="detalleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalles de la Solicitud</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modal-body-content"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="static/js/app.js"></script>
+    <script>
+        if (!initPage()) { /* redirected */ }
+
+        var user = getCurrentUser();
+        if (!isAprobador(user)) {
+            window.location.href = "home.html";
+        }
+
+        function renderAprobaciones() {
+            var solicitudes = getSolicitudes();
+            var pendientesBody = document.getElementById("pendientes-body");
+            var aprobadasBody = document.getElementById("aprobadas-body");
+            pendientesBody.innerHTML = "";
+            aprobadasBody.innerHTML = "";
+
+            var pendientes = solicitudes.filter(function(s) { return s.estado === "Pendiente"; });
+            var aprobadas = solicitudes.filter(function(s) { return s.estado === "Autorizado"; });
+
+            for (var i = 0; i < pendientes.length; i++) {
+                var s = pendientes[i];
+                var solUser = getUserByEmail(s.solicitante_email);
+                var tr = document.createElement("tr");
+                tr.innerHTML = '<td>' + s.numero_sic + '</td>'
+                    + '<td>' + escapeHtml(solUser ? getFullName(solUser) : 'N/A') + '</td>'
+                    + '<td>' + (s.es_muestra ? 'Sí' : 'No') + '</td>'
+                    + '<td>' + escapeHtml(s.descripcion) + '</td>'
+                    + '<td>' + formatDate(s.fecha_requerida) + '</td>'
+                    + '<td>' + escapeHtml(s.estado) + '</td>'
+                    + '<td>'
+                    + '<button class="btn btn-success btn-sm me-1" onclick="cambiarEstado(' + s.numero_sic + ', \'Autorizado\')">Aprobar</button>'
+                    + '<button class="btn btn-danger btn-sm" onclick="cambiarEstado(' + s.numero_sic + ', \'Rechazado\')">Rechazar</button>'
+                    + '</td>';
+                pendientesBody.appendChild(tr);
+            }
+
+            for (var j = 0; j < aprobadas.length; j++) {
+                var sa = aprobadas[j];
+                var solUserA = getUserByEmail(sa.solicitante_email);
+                var trA = document.createElement("tr");
+                trA.innerHTML = '<td>' + sa.numero_sic + '</td>'
+                    + '<td>' + escapeHtml(solUserA ? getFullName(solUserA) : 'N/A') + '</td>'
+                    + '<td>' + (sa.es_muestra ? 'Sí' : 'No') + '</td>'
+                    + '<td>' + escapeHtml(sa.descripcion) + '</td>'
+                    + '<td>' + formatDate(sa.fecha_requerida) + '</td>'
+                    + '<td>' + escapeHtml(sa.estado) + '</td>'
+                    + '<td>'
+                    + '<button class="btn btn-info btn-sm me-1" onclick="showDetail(' + sa.numero_sic + ')">Ver Detalles</button>'
+                    + '<button class="btn btn-secondary btn-sm">Enviar JSON</button>'
+                    + '</td>';
+                aprobadasBody.appendChild(trA);
+            }
+        }
+
+        function cambiarEstado(numSic, nuevoEstado) {
+            var solicitudes = getSolicitudes();
+            for (var i = 0; i < solicitudes.length; i++) {
+                if (solicitudes[i].numero_sic === numSic) {
+                    solicitudes[i].estado = nuevoEstado;
+                    break;
+                }
+            }
+            saveSolicitudes(solicitudes);
+            var alertEl = document.getElementById("alert-msg");
+            alertEl.className = "alert " + (nuevoEstado === "Autorizado" ? "alert-success" : "alert-warning");
+            alertEl.textContent = "Solicitud N° " + numSic + " " + nuevoEstado.toLowerCase() + ".";
+            alertEl.classList.remove("d-none");
+            renderAprobaciones();
+        }
+
+        function showDetail(numSic) {
+            var solicitudes = getSolicitudes();
+            var s = null;
+            for (var i = 0; i < solicitudes.length; i++) {
+                if (solicitudes[i].numero_sic === numSic) { s = solicitudes[i]; break; }
+            }
+            if (!s) return;
+            var solUser = getUserByEmail(s.solicitante_email);
+
+            var html = '<p><strong>N° SIC:</strong> ' + s.numero_sic + '</p>';
+            html += '<p><strong>Nombre Completo:</strong> ' + escapeHtml(solUser ? getFullName(solUser) : 'N/A') + '</p>';
+            html += '<p><strong>¿Es para muestra?:</strong> ' + (s.es_muestra ? 'Sí' : 'No') + '</p>';
+            html += '<p><strong>Pertenece a:</strong> ' + escapeHtml(s.pertenece) + '</p>';
+            html += '<p><strong>Fecha Requerida:</strong> ' + formatDate(s.fecha_requerida) + '</p>';
+            html += '<p><strong>Descripción:</strong> ' + escapeHtml(s.descripcion) + '</p>';
+            html += '<p><strong>Especificación Técnica:</strong> ' + escapeHtml(s.especificacion_tecnica) + '</p>';
+            html += '<p><strong>Cantidad:</strong> ' + s.cantidad + '</p>';
+            html += '<p><strong>Unidad:</strong> ' + escapeHtml(s.unidad) + '</p>';
+            html += '<p><strong>Comentario:</strong> ' + escapeHtml(s.comentario || '') + '</p>';
+            html += '<p><strong>Archivo:</strong> No hay archivo adjunto.</p>';
+
+            document.getElementById("modal-body-content").innerHTML = html;
+            var modal = new bootstrap.Modal(document.getElementById("detalleModal"));
+            modal.show();
+        }
+
+        renderAprobaciones();
+    </script>
+</body>
+</html>

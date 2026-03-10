@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Solicitud SIC - Sistema de Autorización</title>
+    <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="static/fontawesome/css/all.min.css" rel="stylesheet">
+    <link href="static/css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar bg-dark text-white vh-100" style="width: 250px; position: fixed;"></div>
+
+        <!-- Main Content -->
+        <div class="content flex-grow-1" style="margin-left: 250px;">
+            <!-- Navbar -->
+            <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #efb911;">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="home.html">Sistema de solicitudes</a>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="container-fluid py-4">
+                <div class="container mt-5">
+                    <div class="card shadow-lg p-4">
+                        <h2 class="text-center mb-4" style="color: #efb911;">Solicitud de Compra - SIC</h2>
+                        <div id="success-msg" class="alert alert-success d-none"></div>
+                        <form id="sic-form">
+                            <div class="mb-3">
+                                <label for="numero_sic" class="form-label">N° SIC</label>
+                                <input type="text" class="form-control" id="numero_sic" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="es_muestra" class="form-label">¿Es para muestra?</label>
+                                <select class="form-select" id="es_muestra" name="es_muestra">
+                                    <option value="false">No</option>
+                                    <option value="true">Sí</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="pertenece" class="form-label">Pertenece a</label>
+                                <input type="text" class="form-control" id="pertenece" name="pertenece" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="fecha_requerida" class="form-label">Fecha Requerida</label>
+                                <input type="date" class="form-control" id="fecha_requerida" name="fecha_requerida" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="solicitante_display" class="form-label">Solicitante</label>
+                                <input type="text" class="form-control" id="solicitante_display" readonly>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="otro_solicitante_checkbox">
+                                    <label class="form-check-label" for="otro_solicitante_checkbox">Otro solicitante</label>
+                                </div>
+                                <input type="text" class="form-control mt-2 d-none" id="otro_solicitante" name="otro_solicitante" placeholder="Escriba el nombre del solicitante">
+                            </div>
+                            <div class="mb-3">
+                                <label for="descripcion" class="form-label">Descripción de la Compra</label>
+                                <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="especificacion_tecnica" class="form-label">Especificación Técnica</label>
+                                <textarea class="form-control" id="especificacion_tecnica" name="especificacion_tecnica" rows="3"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="cantidad" class="form-label">Cantidad</label>
+                                <input type="number" class="form-control" id="cantidad" name="cantidad" min="1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="unidad" class="form-label">Unidad</label>
+                                <input type="text" class="form-control" id="unidad" name="unidad" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="comentario" class="form-label">Comentario</label>
+                                <textarea class="form-control" id="comentario" name="comentario" rows="2"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="archivo" class="form-label">Adjuntar Archivo</label>
+                                <input type="file" class="form-control" id="archivo" name="archivo">
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn-success">Enviar Solicitud</button>
+                                <a href="historial.html" class="btn btn-secondary">Cancelar</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class="bg-dark text-white py-3">
+                <div class="container text-center">
+                    <small>&copy; 2026 Sistema de Autorización de Compras</small>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="static/js/app.js"></script>
+    <script>
+        if (!initPage()) { /* redirected */ }
+
+        var user = getCurrentUser();
+        document.getElementById("numero_sic").value = getNextNumeroSIC();
+        document.getElementById("pertenece").value = user.pertenece;
+        document.getElementById("solicitante_display").value = getFullName(user);
+
+        document.getElementById("otro_solicitante_checkbox").addEventListener("change", function() {
+            var input = document.getElementById("otro_solicitante");
+            input.classList.toggle("d-none", !this.checked);
+        });
+
+        document.getElementById("sic-form").addEventListener("submit", function(e) {
+            e.preventDefault();
+            var solicitud = {
+                numero_sic: getNextNumeroSIC(),
+                es_muestra: document.getElementById("es_muestra").value === "true",
+                pertenece: document.getElementById("pertenece").value,
+                fecha_sic: getTodayStr(),
+                fecha_requerida: document.getElementById("fecha_requerida").value,
+                solicitante_email: user.email,
+                descripcion: document.getElementById("descripcion").value,
+                especificacion_tecnica: document.getElementById("especificacion_tecnica").value,
+                cantidad: parseInt(document.getElementById("cantidad").value),
+                unidad: document.getElementById("unidad").value,
+                comentario: document.getElementById("comentario").value,
+                estado: "Pendiente",
+                archivo: null,
+                editada: false
+            };
+
+            var solicitudes = getSolicitudes();
+            solicitudes.push(solicitud);
+            saveSolicitudes(solicitudes);
+
+            var msg = document.getElementById("success-msg");
+            msg.textContent = "Solicitud N° " + solicitud.numero_sic + " creada exitosamente.";
+            msg.classList.remove("d-none");
+
+            // Reset form
+            document.getElementById("sic-form").reset();
+            document.getElementById("numero_sic").value = getNextNumeroSIC();
+            document.getElementById("pertenece").value = user.pertenece;
+            document.getElementById("solicitante_display").value = getFullName(user);
+        });
+    </script>
+</body>
+</html>
