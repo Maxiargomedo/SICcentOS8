@@ -1,0 +1,52 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+}
+
+.navbar {
+    background-color: #efb911 !important;
+}
+
+.sidebar {
+    background-color: #343a40;
+    color: white;
+}
+
+.sidebar .nav-link {
+    color: white;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #495057;
+}
+
+.btn-primary {
+    background-color: #efb911;
+    border-color: #efb911;
+    color: black;
+}
+
+.btn-primary:hover {
+    background-color: #d9a50f;
+    border-color: #d9a50f;
+}
+
+.table th {
+    background-color: #efb911;
+    color: black;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f8f9fa;
+}
+
+.table-striped tbody tr:nth-of-type(even) {
+    background-color: #e9ecef;
+}
+
+footer {
+    background-color: #343a40;
+    color: white;
+}
